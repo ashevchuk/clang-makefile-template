@@ -1,74 +1,104 @@
-# Copyright (C) Lambda Cloud Software 2015
+MAIN_PROG := main
+
+COPYRIGHT = Copyright (C) Lambda Cloud Software 2015
+
 
 CC = clang
-CFLAGS = -O -Wall -g
-LDFLAGS = -Dall
 CPP = clang
+
 LINK = $(CC)
 
-MAIN_PROG = main
+CFLAGS += -O -Wall -g
+CPPFLAGS += -O -Wall -g
 
-OBJ_DIR = obj
-SRC_DIR = src
+LDFLAGS += -Dall
+LDDFLAGS += -Dall
 
-CONFIG_H = config.h
+OBJ_DIR := obj
+SRC_DIR := src
 
-ALL_INC = -I /usr/local/include \
+CONFIG_H := config.h
+
+SRC := $(shell find $(SRC_DIR) -type f -name "*.cpp")
+HEADERS := $(shell find $(SRC_DIR) -type f -name "*.h")
+OBJ := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(patsubst %.cpp,%.o,$(SRC)))
+DEFS := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(patsubst %.cpp,%.cpp.d,$(SRC)))
+
+SRC_DIRS = $(sort $(dir $(SRC)))
+OBJ_DIRS = $(sort $(dir $(OBJ)))
+
+SYS_DATE := $(shell date -R -u)
+OS_VERSION := $(shell uname -a)
+CC_VERSION := $(shell $(CC) --version | head -n 1)
+CPP_VERSION := $(shell $(CPP) --version | head -n 1)
+REPO_VERSION := $(shell git log | head -n1 | grep commit | perl -pe 's/commit\s//')
+
+ALL_INC := -I /usr/local/include \
 	-I /usr/include \
 	-include $(OBJ_DIR)/include/$(CONFIG_H)
 
-OBJ = $(OBJ_DIR)/main.o \
-	$(OBJ_DIR)/test.o
-
-REPO_VER = $(shell git log | head -n1 | grep commit | perl -pe 's/commit\s//')
-OS_VER = $(shell uname -a)
-SYS_DATE = $(shell date -R -u)
-CC_VERSION = $(shell $(CC) --version | head -n 1)
+CFLAGS += $(ALL_INC)
+CPPFLAGS += $(ALL_INC)
 
 default: all
 
-all: prepare build strip
-	echo "Build done"
+all: clean build strip
+	@echo Make done
 
 prepare:
+	@echo Prepare environment
+	@echo Object dirs: $(OBJ_DIRS)
+	@echo Object files: $(OBJ)
+	@echo Source files: $(SRC)
+	@echo Source headers: $(HEADERS)
+	@echo Source defs: $(DEFS)
 	mkdir -p $(OBJ_DIR)
+	mkdir -p $(OBJ_DIRS)
 	mkdir -p $(OBJ_DIR)/include
 
 strip:
 	strip $(OBJ_DIR)/$(MAIN_PROG)
 
-link: $(OBJ)
-	$(LINK) -o $(OBJ_DIR)/$(MAIN_PROG) $(OBJ) $(LDFLAGS) -L/usr/local/lib -lpcre
-
-build: prepare configure link
-#	$(LINK) -o $(OBJ_DIR)/$(MAIN_PROG) $(OBJ) -L$(OBJ_DIR) -L/usr/local/lib -lpcre
+build: prepare configure define_code link
+	@echo Build done
 
 configure: $(OBJ_DIR)/include/$(CONFIG_H)
-	
+	@echo Configure done
+
+define_code: $(DEFS)
+	@echo Code define done
 
 $(OBJ_DIR)/include/$(CONFIG_H):
-	echo '#ifndef _CONFIG_H_INCLUDED_' > $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define _CONFIG_H_INCLUDED_' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define _BUILD_OS_VERSION_ "$(OS_VER)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define _BUILD_CC_VERSION_ "$(CC_VERSION)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define _BUILD_CC_CFLAGS_ "$(CFLAGS)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define _BUILD_CC_LDFLAGS_ "$(LDFLAGS)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define _BUILD_REPO_VERSION_ "$(REPO_VER)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define _BUILD_SYS_DATE_ "$(SYS_DATE)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#endif' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo Generating $(CONFIG_H)
+	@echo '#ifndef _BUILD_CONFIG_H_INCLUDED_' > $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_CONFIG_H_INCLUDED_' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_OS_VERSION_ "$(OS_VERSION)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_CC_VERSION_ "$(CC_VERSION)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_CPP_VERSION_ "$(CPP_VERSION)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_CC_CPPFLAGS_ "$(CPPFLAGS)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_CC_LDDFLAGS_ "$(LDDFLAGS)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_CC_CFLAGS_ "$(CFLAGS)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_CC_LDFLAGS_ "$(LDFLAGS)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_REPO_VERSION_ "$(REPO_VERSION)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_SYS_DATE_ "$(SYS_DATE)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '	#define _BUILD_COPYRIGHT_ "$(COPYRIGHT)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	@echo '#endif' >> $(OBJ_DIR)/include/$(CONFIG_H)
 
-$(OBJ_DIR)/test.o: $(SRC_DIR)/test.cpp
-	$(CPP) -c $(CFLAGS) $(ALL_INC) \
-		-o $(OBJ_DIR)/test.o \
-		$(SRC_DIR)/test.cpp
+$(OBJ_DIR)/%.cpp.d: $(SRC_DIR)/%.cpp
+	@echo Building def $@ from $^
+	$(CPP) $(CPPFLAGS) -M $^ -o $@
 
-$(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp
-	$(CPP) -c $(CFLAGS) $(ALL_INC) \
-		-o $(OBJ_DIR)/main.o \
-		$(SRC_DIR)/main.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@echo Building $@ from $^
+	$(CPP) -c $(CPPFLAGS) $^ -o $@
 
-clean:
-	rm -rf $(OBJ_DIR)
+link: $(OBJ)
+	@echo Linking $(MAIN_PROG)
+	$(LINK) $(LDDFLAGS) $(OBJ) -o $(OBJ_DIR)/$(MAIN_PROG)
 
 install:
-	$(MAKE) -f objs/Makefile install
+	$(MAKE) -f $(OBJ_DIR)/Makefile install
+
+.PHONY : clean
+clean:
+	-rm -rf $(OBJ_DIR)
