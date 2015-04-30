@@ -1,3 +1,5 @@
+# Copyright (C) Lambda Cloud Software 2015
+
 CC = clang
 CFLAGS = -O -Wall -g
 LDFLAGS = -Dall
@@ -17,6 +19,11 @@ ALL_INC = -I /usr/local/include \
 
 OBJ = $(OBJ_DIR)/main.o \
 	$(OBJ_DIR)/test.o
+
+REPO_VER = $(shell git log | head -n1 | grep commit | perl -pe 's/commit\s//')
+OS_VER = $(shell uname -a)
+SYS_DATE = $(shell date -R -u)
+CC_VERSION = $(shell $(CC) --version | head -n 1)
 
 default: all
 
@@ -42,10 +49,13 @@ configure: $(OBJ_DIR)/include/$(CONFIG_H)
 $(OBJ_DIR)/include/$(CONFIG_H):
 	echo '#ifndef _CONFIG_H_INCLUDED_' > $(OBJ_DIR)/include/$(CONFIG_H)
 	echo '#define _CONFIG_H_INCLUDED_' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define VERSION "1.7.11"' >> $(OBJ_DIR)/include/$(CONFIG_H)
-	echo '#define BUILD_VERSION "1.7.11"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	echo '#define _BUILD_OS_VERSION_ "$(OS_VER)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	echo '#define _BUILD_CC_VERSION_ "$(CC_VERSION)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	echo '#define _BUILD_CC_CFLAGS_ "$(CFLAGS)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	echo '#define _BUILD_CC_LDFLAGS_ "$(LDFLAGS)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	echo '#define _BUILD_REPO_VERSION_ "$(REPO_VER)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
+	echo '#define _BUILD_SYS_DATE_ "$(SYS_DATE)"' >> $(OBJ_DIR)/include/$(CONFIG_H)
 	echo '#endif' >> $(OBJ_DIR)/include/$(CONFIG_H)
-
 
 $(OBJ_DIR)/test.o: $(SRC_DIR)/test.cpp
 	$(CPP) -c $(CFLAGS) $(ALL_INC) \
