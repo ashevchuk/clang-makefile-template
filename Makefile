@@ -1,6 +1,6 @@
 MAIN_PROG := main
 
-COPYRIGHT = Copyright (C) Lambda Cloud Software 2015
+COPYRIGHT := Copyright (C) Lambda Cloud Software 2015
 
 
 CC = clang
@@ -10,7 +10,7 @@ LINK = $(CC)
 
 LD_LIBS += -lz
 
-SYS_INC = /usr/local/include \
+SYS_INC += /usr/local/include \
 	/usr/include
 
 CFLAGS += -O -Wall -g
@@ -42,7 +42,7 @@ CC_VERSION := $(shell $(CC) --version | head -n 1)
 CPP_VERSION := $(shell $(CPP) --version | head -n 1)
 REPO_VERSION := $(lastword $(shell git log | grep commit | head -n1))
 
-LOCAL_INC := $(sort $(dir $(addprefix -I,$(HEADERS))))
+LOCAL_INC += $(sort $(dir $(addprefix -I,$(HEADERS))))
 CONFIG_INC += -include $(BUILD_CONFIG)
 
 ALL_INC += $(CONFIG_INC)
