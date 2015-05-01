@@ -8,6 +8,11 @@ CPP = clang
 
 LINK = $(CC)
 
+LD_LIBS += -lz
+
+SYS_INC = -I /usr/local/include \
+	-I /usr/include \
+
 CFLAGS += -O -Wall -g
 CPPFLAGS += -O -Wall -g
 
@@ -31,14 +36,22 @@ SYS_DATE := $(shell date -R -u)
 OS_VERSION := $(shell uname -a)
 CC_VERSION := $(shell $(CC) --version | head -n 1)
 CPP_VERSION := $(shell $(CPP) --version | head -n 1)
-REPO_VERSION := $(shell git log | head -n1 | grep commit | perl -pe 's/commit\s//')
+REPO_VERSION := $(lastword $(shell git log | grep commit | head -n1))
 
-ALL_INC := -I /usr/local/include \
-	-I /usr/include \
-	-include $(OBJ_DIR)/include/$(CONFIG_H)
+
+LOCAL_INC := $(sort $(dir $(addprefix -I,$(HEADERS))))
+CONFIG_INC += -include $(OBJ_DIR)/include/$(CONFIG_H)
+
+ALL_INC += $(LOCAL_INC)
+ALL_INC += $(SYS_INC)
+ALL_INC += $(CONFIG_INC)
 
 CFLAGS += $(ALL_INC)
 CPPFLAGS += $(ALL_INC)
+
+LDFLAGS += $(LD_LIBS)
+LDDFLAGS += $(LD_LIBS)
+
 
 default: all
 
