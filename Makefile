@@ -4,7 +4,7 @@ COPYRIGHT := Copyright (C) Lambda Cloud Software 2015
 
 
 CC = clang
-CPP = clang
+CXX = clang
 
 LINK = $(CC)
 
@@ -39,7 +39,7 @@ OBJ_DIRS = $(sort $(dir $(OBJ)))
 SYS_DATE := $(shell date -R -u)
 OS_VERSION := $(shell uname -a)
 CC_VERSION := $(shell $(CC) --version | head -n 1)
-CPP_VERSION := $(shell $(CPP) --version | head -n 1)
+CPP_VERSION := $(shell $(CXX) --version | head -n 1)
 REPO_VERSION := $(lastword $(shell git log | grep commit | head -n1))
 
 LOCAL_INC += $(sort $(dir $(addprefix -I,$(HEADERS))))
@@ -104,11 +104,11 @@ $(BUILD_CONFIG):
 
 $(OBJ_DIR)/%.cpp.d: $(SRC_DIR)/%.cpp
 	@echo Building def $@ from $^
-	$(CPP) $(CPPFLAGS) -M $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -M $^ -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo Building $@ from $^
-	$(CPP) -c $(CPPFLAGS) $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^ -o $@
 
 link: compile
 	@echo Linking $(MAIN_PROG)
