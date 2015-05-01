@@ -4,8 +4,8 @@ COPYRIGHT := Copyright (C) Lambda Cloud Software 2015
 
 
 CC = clang
-CXX = clang
-
+CXX = $(CC)
+CPP = $(CC) -E
 LINK = $(CC)
 
 LD_LIBS += -lz
@@ -51,9 +51,9 @@ ALL_INC += $(addprefix -I,$(SYS_INC))
 
 CFLAGS += $(ALL_INC)
 CPPFLAGS += $(ALL_INC)
+CXXFLAGS += $(ALL_INC)
 
 LDFLAGS += $(LD_LIBS)
-LDDFLAGS += $(LD_LIBS)
 
 
 default: all
@@ -112,7 +112,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 link: compile
 	@echo Linking $(MAIN_PROG)
-	$(LINK) $(LDDFLAGS) $(OBJ) -o $(OBJ_DIR)/$(MAIN_PROG)
+	$(LINK) $(LDFLAGS) $(OBJ) -o $(OBJ_DIR)/$(MAIN_PROG)
 
 install:
 	$(MAKE) -f $(OBJ_DIR)/Makefile install
