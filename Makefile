@@ -8,6 +8,8 @@ CXX = $(CC)
 CPP = $(CC) -E
 LINK = $(CC)
 
+SHELL = /bin/sh
+
 LD_LIBS += -lz
 
 SYS_INC += /usr/local/include \
