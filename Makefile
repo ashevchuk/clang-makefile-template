@@ -1,8 +1,9 @@
 MAIN_PROG := main
 
-COPYRIGHT := Copyright (C) Lambda Cloud Software 2015
+COPYRIGHT := Copyright (C) Lambda Cloud Software 2016
 
 STD = c++11
+
 CC = clang
 CXX = $(CC)++ -std=$(STD)
 CPP = $(CC) -E
@@ -10,7 +11,8 @@ LINK = $(CC)
 
 SHELL = /bin/sh
 
-LD_LIBS += -lz -lstdc++
+LD_LIBS += -lz
+LD_LIBS += -lstdc++
 
 SYS_INC += /usr/local/include \
 	/usr/include
@@ -30,7 +32,7 @@ CONFIG_DIR := include
 BUILD_CONFIG := $(OBJ_DIR)/$(CONFIG_DIR)/$(CONFIG_H)
 
 SRC := $(shell find $(SRC_DIR) -type f -name "*.cpp")
-HEADERS := $(shell find $(SRC_DIR) -type f -name "*.h")
+HEADERS := $(shell find $(SRC_DIR) -type f -name "*.hpp")
 
 OBJ := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(patsubst %.cpp,%.o,$(SRC)))
 DEFS := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(patsubst %.cpp,%.cpp.d,$(SRC)))

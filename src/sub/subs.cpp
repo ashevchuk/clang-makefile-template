@@ -1,4 +1,4 @@
-#include "subs.h"
+#include "subs.hpp"
 #include <stdio.h>
 
 int testsubs(void) {
