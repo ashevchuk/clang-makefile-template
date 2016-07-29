@@ -2,15 +2,15 @@ MAIN_PROG := main
 
 COPYRIGHT := Copyright (C) Lambda Cloud Software 2015
 
-
+STD = c++11
 CC = clang
-CXX = $(CC)
+CXX = $(CC)++ -std=$(STD)
 CPP = $(CC) -E
 LINK = $(CC)
 
 SHELL = /bin/sh
 
-LD_LIBS += -lz
+LD_LIBS += -lz -lstdc++
 
 SYS_INC += /usr/local/include \
 	/usr/include

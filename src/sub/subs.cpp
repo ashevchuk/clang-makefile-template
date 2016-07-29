@@ -1,6 +1,7 @@
 #include "subs.h"
 #include <stdio.h>
-  
+
 int testsubs(void) {
-    printf("Hello, World!\n");
+    std::cout << "Hello, World!\n";
+    return 0;
 }
